@@ -1,5 +1,10 @@
 package com.xjcy.easywx.config;
 
+/**
+ * 微信配置
+ * @author YYDF
+ * 2018-03-26
+ */
 public class WXConfig {
 	private String appId;
 	private String appSecret;

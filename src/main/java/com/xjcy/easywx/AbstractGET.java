@@ -8,8 +8,8 @@ public abstract class AbstractGET {
 	protected String _key;
 	protected String _notifyUrl;
 	
-	protected static String _token;
-	protected static Long _startTime = 0L;
+	protected String _token;
+	protected Long _startTime = 0L;
 	
 	public abstract String getOpenId(String code);
 
