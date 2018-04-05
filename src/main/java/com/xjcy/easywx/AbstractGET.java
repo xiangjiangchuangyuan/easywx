@@ -9,9 +9,18 @@ public abstract class AbstractGET {
 	protected String _notifyUrl;
 	
 	protected String _token;
-	protected Long _startTime = 0L;
+	protected Long _tokenTime = 0L;
+	protected String _ticket;
+	protected Long _ticketTime = 0L;
 	
 	public abstract String getOpenId(String code);
 
 	public abstract String getAccessToken();
+
+	public abstract String getJsapiTicket();
+	
+	protected static boolean isSuccessful(String json)
+	{
+		return !json.contains("\"errcode\"");
+	}
 }

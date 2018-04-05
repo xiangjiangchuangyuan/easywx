@@ -10,6 +10,7 @@ public class DefaultGETImpl extends AbstractGET {
 
 	private static final String URL_OPENID = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code";
 	private static final String URL_TOKEN = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
+	private static final String URL_JSTICKET = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi";
 
 	private static final int TIME = 7100 * 1000;
 
@@ -21,20 +22,32 @@ public class DefaultGETImpl extends AbstractGET {
 	@Override
 	public String getOpenId(String code) {
 		String json = WebClient.downloadString(String.format(URL_OPENID, _appId, _appSecret, code));
-		if (!json.contains("\"errcode\""))
+		if (isSuccessful(json))
 			return JSONUtils.getString(json, "openid");
 		return null;
 	}
 
 	@Override
 	public synchronized String getAccessToken() {
-		if (StringUtils.isEmpty(_token) || (System.currentTimeMillis() - _startTime) > TIME) {
+		if (StringUtils.isEmpty(_token) || (System.currentTimeMillis() - _tokenTime) > TIME) {
 			String json = WebClient.downloadString(String.format(URL_TOKEN, _appId, _appSecret));
-			if (!json.contains("\"errcode\"")) {
+			if (isSuccessful(json)) {
 				_token = JSONUtils.getString(json, "access_token");
-				_startTime = System.currentTimeMillis();
+				_tokenTime = System.currentTimeMillis();
 			}
 		}
 		return _token;
+	}
+
+	@Override
+	public synchronized String getJsapiTicket() {
+		if (StringUtils.isEmpty(_ticket) || (System.currentTimeMillis() - _ticketTime) > TIME) {
+			String json = WebClient.downloadString(String.format(URL_JSTICKET, getAccessToken()));
+			if (isSuccessful(json)) {
+				_ticket = JSONUtils.getString(json, "ticket");
+				_ticketTime = System.currentTimeMillis();
+			}
+		}
+		return _ticket;
 	}
 }
