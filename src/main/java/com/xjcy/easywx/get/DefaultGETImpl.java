@@ -43,7 +43,7 @@ public class DefaultGETImpl extends AbstractGET {
 	public synchronized String getJsapiTicket() {
 		if (StringUtils.isEmpty(_ticket) || (System.currentTimeMillis() - _ticketTime) > TIME) {
 			String json = WebClient.downloadString(String.format(URL_JSTICKET, getAccessToken()));
-			if (isSuccessful(json)) {
+			if (json != null && json.contains("\"ticket\"")) {
 				_ticket = JSONUtils.getString(json, "ticket");
 				_ticketTime = System.currentTimeMillis();
 			}
