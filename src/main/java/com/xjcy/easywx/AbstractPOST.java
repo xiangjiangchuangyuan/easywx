@@ -21,6 +21,8 @@ public abstract class AbstractPOST {
 
 	// 客服返回文本消息
 	public abstract boolean sendText(String openId, String text);
+	// 创建菜单
+	public abstract boolean createMenu(String json);
 
 	protected String getAccessToken() {
 		return WXUtil.get().getAccessToken();
