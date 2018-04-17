@@ -2,6 +2,7 @@ package com.xjcy.easywx.post;
 
 import com.xjcy.easywx.AbstractPOST;
 import com.xjcy.easywx.config.WXConfig;
+import com.xjcy.util.JSONUtils;
 import com.xjcy.util.http.WebClient;
 
 public class DefaultPOSTImpl extends AbstractPOST {
@@ -56,7 +57,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	@Override
 	public boolean createMenu(String json) {
 		String result = WebClient.uploadString(String.format(URL_MENU_CREATE, getAccessToken()), json);
-		return isSuccessful(result);
+		return JSONUtils.getInteger(result, "errcode") == 0;
 	}
 
 }
