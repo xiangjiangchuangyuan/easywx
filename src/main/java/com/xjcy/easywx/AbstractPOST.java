@@ -23,6 +23,8 @@ public abstract class AbstractPOST {
 	public abstract boolean sendText(String openId, String text);
 	// 创建菜单
 	public abstract boolean createMenu(String json);
+	// 发送模板消息
+	public abstract boolean sendTemplate(String json);
 
 	protected String getAccessToken() {
 		return WXUtil.get().getAccessToken();
@@ -43,5 +45,4 @@ public abstract class AbstractPOST {
 	protected synchronized long getTimestamp() {
 		return System.currentTimeMillis() / 1000;
 	}
-
 }

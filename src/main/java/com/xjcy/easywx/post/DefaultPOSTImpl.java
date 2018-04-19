@@ -10,7 +10,8 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	private static final String URL_CREATEQRCODE = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s";
 	private static final String URL_CUSTOM_SEND = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s";
 	private static final String URL_MENU_CREATE = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=%s";
-
+	private static final String URL_SEND_TEMPLATE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s";
+	
 	private static final String POST_SCENE_ID = "{\"action_name\": \"QR_LIMIT_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": %s}}}";
 	private static final String POST_SCENE_STR = "{\"action_name\": \"QR_LIMIT_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"%s\"}}}";
 	private static final String POST_SEND_TEXT = "{\"touser\":\"%s\",\"msgtype\":\"text\",\"text\":{\"content\":\"%s\"}}";
@@ -58,6 +59,12 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	public boolean createMenu(String json) {
 		String result = WebClient.uploadString(String.format(URL_MENU_CREATE, getAccessToken()), json);
 		return JSONUtils.getInteger(result, "errcode") == 0;
+	}
+
+	@Override
+	public boolean sendTemplate(String json) {
+		String result = WebClient.uploadString(String.format(URL_SEND_TEMPLATE, getAccessToken()), json);
+		return isSuccessful(result);
 	}
 
 }
