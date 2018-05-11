@@ -1,5 +1,7 @@
 package com.xjcy.easywx.config;
 
+import javax.net.ssl.SSLSocketFactory;
+
 /**
  * 微信配置
  * @author YYDF
@@ -11,10 +13,13 @@ public class WXConfig {
 	private String mchId;
 	private String key;
 	private String notifyUrl;
+	private boolean isMiniProgram;
+	private SSLSocketFactory sslSocket;
 
-	public WXConfig(String appId, String appSecret) {
+	public WXConfig(String appId, String appSecret, boolean isMiniProgram) {
 		this.appId = appId;
 		this.appSecret = appSecret;
+		this.isMiniProgram = isMiniProgram;
 	}
 
 	public String getAppId() {
@@ -55,5 +60,17 @@ public class WXConfig {
 
 	public void setNotifyUrl(String notifyUrl) {
 		this.notifyUrl = notifyUrl;
+	}
+
+	public boolean isMiniProgram() {
+		return isMiniProgram;
+	}
+
+	public SSLSocketFactory getSslSocket() {
+		return sslSocket;
+	}
+
+	public void setSslSocket(SSLSocketFactory sslSocket) {
+		this.sslSocket = sslSocket;
 	}
 }

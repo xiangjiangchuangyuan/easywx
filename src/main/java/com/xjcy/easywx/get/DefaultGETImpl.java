@@ -9,6 +9,7 @@ import com.xjcy.util.http.WebClient;
 public class DefaultGETImpl extends AbstractGET {
 
 	private static final String URL_OPENID = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code";
+	private static final String URL_PROJRAM_OPENID = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code";
 	private static final String URL_TOKEN = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
 	private static final String URL_JSTICKET = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi";
 
@@ -17,11 +18,16 @@ public class DefaultGETImpl extends AbstractGET {
 	public DefaultGETImpl(WXConfig wxConfig) {
 		this._appId = wxConfig.getAppId();
 		this._appSecret = wxConfig.getAppSecret();
+		this._isMiniProgram = wxConfig.isMiniProgram();
 	}
 
 	@Override
 	public String getOpenId(String code) {
-		String json = WebClient.downloadString(String.format(URL_OPENID, _appId, _appSecret, code));
+		String json;
+		if(_isMiniProgram)
+			json = WebClient.downloadString(String.format(URL_PROJRAM_OPENID, _appId, _appSecret, code));
+		else
+			json = WebClient.downloadString(String.format(URL_OPENID, _appId, _appSecret, code));
 		if (isSuccessful(json))
 			return JSONUtils.getString(json, "openid");
 		return null;

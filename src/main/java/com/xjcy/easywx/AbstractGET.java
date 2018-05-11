@@ -7,6 +7,7 @@ public abstract class AbstractGET {
 	protected String _mchId;
 	protected String _key;
 	protected String _notifyUrl;
+	protected boolean _isMiniProgram;
 	
 	protected String _token;
 	protected Long _tokenTime = 0L;

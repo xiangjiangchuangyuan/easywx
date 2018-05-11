@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.SSLSocketFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,8 +38,30 @@ public class WXUtil {
 	 * @param appSecret
 	 */
 	public static void register(String appId, String appSecret) {
-		wxConfig = new WXConfig(appId, appSecret);
+		register(appId, appSecret, false);
+	}
+
+	/**
+	 * 注册小程序服务
+	 * @param appId
+	 * @param appSecret
+	 * @param isMiniProgram
+	 */
+	public static void register(String appId, String appSecret, boolean isMiniProgram) {
+		wxConfig = new WXConfig(appId, appSecret, isMiniProgram);
 		logger.debug("Register success with appId => " + appId);
+	}
+	
+	public static void registerPay(String mchId, String apiKey, String notifyUrl) {
+		registerPay(mchId, apiKey, notifyUrl, null);
+	}
+	
+	public static void registerPay(String mchId, String apiKey, String notifyUrl, SSLSocketFactory ssl) {
+		wxConfig.setMchId(mchId);
+		wxConfig.setKey(apiKey);
+		wxConfig.setNotifyUrl(notifyUrl);
+		wxConfig.setSslSocket(ssl);
+		logger.debug("Register success with notifyUrl => " + notifyUrl);
 	}
 
 	public static AbstractPOST post() {
