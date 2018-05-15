@@ -21,7 +21,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	private static final String URL_SEND_TEMPLATE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s";
 	private static final String URL_CREATE_UNIFIEDORDER = "https://api.mch.weixin.qq.com/pay/unifiedorder";
 	private static final String URL_REFUND_ORDER = "https://api.mch.weixin.qq.com/secapi/pay/refund";
-	
+
 	private static final String POST_SCENE_ID = "{\"action_name\": \"QR_LIMIT_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": %s}}}";
 	private static final String POST_SCENE_STR = "{\"action_name\": \"QR_LIMIT_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"%s\"}}}";
 	private static final String POST_SEND_TEXT = "{\"touser\":\"%s\",\"msgtype\":\"text\",\"text\":{\"content\":\"%s\"}}";
@@ -33,6 +33,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 		this._key = wxConfig.getKey();
 		this._notifyUrl = wxConfig.getNotifyUrl();
 		this._sslSocket = wxConfig.getSslSocket();
+		this._isMiniProgram = wxConfig.isMiniProgram();
 	}
 
 	@Override
@@ -83,8 +84,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 
 	@Override
 	public Map<String, Object> createUnifiedOrder(UnifiedOrder order) {
-		if (_mchId == null || _key == null || _notifyUrl == null)
-		{
+		if (_mchId == null || _key == null || _notifyUrl == null) {
 			logger.error("请调用WXUtil.registerPay，注册微信支付必要参数");
 			return null;
 		}
@@ -112,8 +112,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 
 		if (StringUtils.isEmpty(order.openid))
 			map.put("trade_type", "APP");// 交易类型
-		else
-		{
+		else {
 			map.put("trade_type", "JSAPI");// 交易类型
 			map.put("openid", order.openid);
 		}
@@ -124,43 +123,36 @@ public class DefaultPOSTImpl extends AbstractPOST {
 		// post调取方法
 		String return_xml = WebClient.uploadString(URL_CREATE_UNIFIEDORDER, XMLUtils.toXML(map));
 		Map<String, Object> result = XMLUtils.doXMLParse(return_xml);
-		if (result != null && result.containsKey("return_code")
-				&& result.get("return_code").toString().equalsIgnoreCase("SUCCESS")
-				&& result.containsKey("result_code"))
-		{
-			if (result.get("result_code").equals("SUCCESS"))
-			{
-				String prepayid = result.containsKey("prepay_id") ? result.get("prepay_id").toString() : null;
-				Map<String, Object> maplast = new HashMap<>();
-				if (StringUtils.isEmpty(order.openid))
-				{
-					maplast.put("appid", _appId);
-					maplast.put("noncestr", getRandamStr());
-					maplast.put("partnerid", _mchId);
-					maplast.put("prepayid", prepayid);
-					maplast.put("timestamp", getTimestamp());
-					maplast.put("package", "Sign=WXPay");
-					maplast.put("sign", getSign(maplast));
-				}
-				else
-				{
-					maplast.put("appId", _appId);
-					maplast.put("nonceStr", getRandamStr());
-					maplast.put("package", "prepay_id=" + prepayid);
-					maplast.put("timeStamp", getTimestamp());
-					maplast.put("signType", "MD5");
-					maplast.put("paySign", getSign(maplast));
-				}
-				return maplast;
+		String returnCode = getValue(result, "return_code");
+		String resultCode = getValue(result, "result_code");
+		if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
+			String prepayid = getValue(result, "prepay_id");
+			Map<String, Object> maplast = new HashMap<>();
+			if (StringUtils.isEmpty(order.openid)) {
+				maplast.put("appid", _appId);
+				maplast.put("noncestr", getRandamStr());
+				maplast.put("partnerid", _mchId);
+				maplast.put("prepayid", prepayid);
+				maplast.put("timestamp", getTimestamp());
+				maplast.put("package", "Sign=WXPay");
+				maplast.put("sign", getSign(maplast));
+			} else {
+				maplast.put("appId", _appId);
+				maplast.put("nonceStr", getRandamStr());
+				maplast.put("package", "prepay_id=" + prepayid);
+				maplast.put("timeStamp", getTimestamp());
+				maplast.put("signType", "MD5");
+				maplast.put("paySign", getSign(maplast));
 			}
+			return maplast;
 		}
+		logger.error("Create faild:" + result.toString());
 		return null;
 	}
 
 	@Override
 	public RefundResult refundOrder(String out_trade_no, String refund_fee) {
-		try
-		{
+		try {
 			Map<String, Object> map = new HashMap<>();
 			map.put("appid", _appId);// 应用ID
 			map.put("mch_id", _mchId);// 商户号
@@ -169,7 +161,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 			map.put("out_refund_no", out_trade_no);// 商户退款单号
 			map.put("total_fee", refund_fee); // 订单总金额
 			map.put("refund_fee", refund_fee); // 退款总金额
-			map.put("notify_url", this._notifyUrl); //退款通知
+			map.put("notify_url", this._notifyUrl); // 退款通知
 
 			// 增加签名
 			map.put("sign", getSign(map));// 签名
@@ -181,23 +173,21 @@ public class DefaultPOSTImpl extends AbstractPOST {
 			Map<String, Object> result = XMLUtils.doXMLParse(return_xml);
 			String returnCode = getValue(result, "return_code");
 			String resultCode = getValue(result, "result_code");
-			if (("SUCCESS").equals(returnCode) && ("SUCCESS").equals(resultCode))
-			{
+			if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
 				RefundResult refund = new RefundResult();
 				refund.appid = getValue(result, "appid");
 				refund.mch_id = getValue(result, "mch_id");
-				refund.transaction_id = getValue(result, "transaction_id"); //微信订单号
+				refund.transaction_id = getValue(result, "transaction_id"); // 微信订单号
 				refund.out_trade_no = getValue(result, "out_trade_no");
-				refund.refund_id = getValue(result, "refund_id"); //微信退款单号
-				refund.refund_fee = getValue(result, "refund_fee");//退款金额
-				refund.total_fee = getValue(result, "total_fee"); //订单总金额
-				refund.cash_fee = getValue(result, "cash_fee"); //现金支付金额
-				refund.cash_refund_fee = getValue(result, "cash_refund_fee"); //现金退款金额
+				refund.refund_id = getValue(result, "refund_id"); // 微信退款单号
+				refund.refund_fee = getValue(result, "refund_fee");// 退款金额
+				refund.total_fee = getValue(result, "total_fee"); // 订单总金额
+				refund.cash_fee = getValue(result, "cash_fee"); // 现金支付金额
+				refund.cash_refund_fee = getValue(result, "cash_refund_fee"); // 现金退款金额
 				return refund;
 			}
-		}
-		catch (Exception e)
-		{
+			logger.error("Refund faild:" + result.toString());
+		} catch (Exception e) {
 			logger.error("申请退款失败", e);
 		}
 		return null;

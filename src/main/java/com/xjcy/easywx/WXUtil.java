@@ -1,5 +1,7 @@
 package com.xjcy.easywx;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import com.xjcy.easywx.config.WXConfig;
 import com.xjcy.easywx.event.AuthEvent;
 import com.xjcy.easywx.get.DefaultGETImpl;
 import com.xjcy.easywx.post.DefaultPOSTImpl;
+import com.xjcy.easywx.post.PayResult;
 import com.xjcy.util.STR;
 import com.xjcy.util.XMLUtils;
 
@@ -118,5 +121,27 @@ public class WXUtil {
 		} catch (Exception e) {
 			logger.error("处理微信auth失败", e);
 		}
+	}
+
+	/**
+	 * 微信支付回调通知
+	 * @param reader
+	 * @return 通知结果
+	 * 2018-05-15
+	 */
+	public static PayResult callback(BufferedReader reader) {
+		
+		try {
+			String xml = XMLUtils.deserialize(reader);
+			logger.info("Notify xml:" + xml);
+			return post().callback(XMLUtils.doXMLParse(xml));
+		} catch (IOException e) {
+			logger.error("Callback faild:", e);
+		}
+		return null;
+	}
+	
+	public static PayResult callback(String reader) {
+		return post().callback(XMLUtils.doXMLParse(reader));
 	}
 }
