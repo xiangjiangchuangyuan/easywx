@@ -15,7 +15,8 @@
 //注册公众号
 WXUtil.register("appId", "appSecret", false);
 //注册支付
-WXUtil.registerPay("mchId", "加密的key", "你的微信回调处理完整链接");\<br>
+WXUtil.registerPay("mchId", "加密的key", "你的微信回调处理完整链接");
+
 //使用方式
 //获取token
 WXUtil.get().getAccessToken();
