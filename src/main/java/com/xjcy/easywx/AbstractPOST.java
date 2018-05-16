@@ -50,7 +50,7 @@ public abstract class AbstractPOST {
 	public abstract Map<String, Object> createUnifiedOrder(UnifiedOrder order);
 
 	// 申请退款
-	public abstract RefundResult refundOrder(String out_trade_no, String refund_fee);
+	public abstract RefundResult refundOrder(String out_trade_no, String refund_fee, String total_fee);
 
 	protected String getAccessToken() {
 		return WXUtil.get().getAccessToken();

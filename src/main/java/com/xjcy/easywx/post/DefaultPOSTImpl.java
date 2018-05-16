@@ -151,7 +151,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	}
 
 	@Override
-	public RefundResult refundOrder(String out_trade_no, String refund_fee) {
+	public RefundResult refundOrder(String out_trade_no, String refund_fee, String total_fee) {
 		try {
 			Map<String, Object> map = new HashMap<>();
 			map.put("appid", _appId);// 应用ID
@@ -159,7 +159,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 			map.put("nonce_str", getRandamStr());// 随机字符串
 			map.put("out_trade_no", out_trade_no);// 商户订单号
 			map.put("out_refund_no", out_trade_no);// 商户退款单号
-			map.put("total_fee", refund_fee); // 订单总金额
+			map.put("total_fee", total_fee); // 订单总金额
 			map.put("refund_fee", refund_fee); // 退款总金额
 			map.put("notify_url", this._notifyUrl); // 退款通知
 
