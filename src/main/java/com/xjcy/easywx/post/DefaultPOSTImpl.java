@@ -16,6 +16,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	private static final Logger logger = Logger.getLogger(DefaultPOSTImpl.class);
 
 	private static final String URL_CREATEQRCODE = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s";
+	private static final String URL_WXACODE = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=%s";
 	private static final String URL_CUSTOM_SEND = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s";
 	private static final String URL_MENU_CREATE = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=%s";
 	private static final String URL_SEND_TEMPLATE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s";
@@ -24,6 +25,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 
 	private static final String POST_SCENE_ID = "{\"action_name\": \"QR_LIMIT_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": %s}}}";
 	private static final String POST_SCENE_STR = "{\"action_name\": \"QR_LIMIT_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"%s\"}}}";
+	private static final String POST_WXACODE_STR = "{\"scene\": \"%s\", \"path\": \"%s\", \"width\": 430}";
 	private static final String POST_SEND_TEXT = "{\"touser\":\"%s\",\"msgtype\":\"text\",\"text\":{\"content\":\"%s\"}}";
 
 	public DefaultPOSTImpl(WXConfig wxConfig) {
@@ -48,6 +50,12 @@ public class DefaultPOSTImpl extends AbstractPOST {
 		String postStr = String.format(POST_SCENE_STR, sceneStr);
 		String json = WebClient.uploadString(String.format(URL_CREATEQRCODE, getAccessToken()), postStr);
 		return isSuccessful(json) ? json : null;
+	}
+
+	@Override
+	public byte[] createWxacode(String sceneStr, String path) {
+		byte[] postData = String.format(POST_WXACODE_STR, sceneStr, path).getBytes();
+		return WebClient.uploadData(String.format(URL_WXACODE, getAccessToken()), postData);
 	}
 
 	@Override

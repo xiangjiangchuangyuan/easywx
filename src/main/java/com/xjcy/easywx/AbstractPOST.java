@@ -33,6 +33,8 @@ public abstract class AbstractPOST {
 	public abstract String createQrcode(Integer sceneId);
 
 	public abstract String createQrcode(String sceneStr);
+	
+	public abstract byte[] createWxacode(String sceneStr, String path);
 
 	// 网页调用时签名url
 	public abstract JsapiTicket signRequestUrl(String url);
