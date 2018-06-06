@@ -1,5 +1,6 @@
 package com.xjcy.easywx;
 
+import java.security.Security;
 import java.util.Base64;
 import java.util.Map;
 import java.util.SortedMap;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.xjcy.easywx.post.JsapiTicket;
 import com.xjcy.easywx.post.PayResult;
@@ -106,6 +108,7 @@ public abstract class AbstractPOST {
 		if (result.containsKey("req_info")) {
 			byte[] data = Base64.getDecoder().decode(result.get("req_info").toString());
 			byte[] key = MD5.encodeByMD5(_key).toLowerCase().getBytes();
+			Security.addProvider(new BouncyCastleProvider());
 			String str = ObjectUtils.decryptData(data, key);
 			if (StringUtils.isNotBlank(str)) {
 				Map<String, Object> result2 = XMLUtils.doXMLParse(str);
