@@ -25,7 +25,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 
 	private static final String POST_SCENE_ID = "{\"action_name\": \"QR_LIMIT_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": %s}}}";
 	private static final String POST_SCENE_STR = "{\"action_name\": \"QR_LIMIT_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"%s\"}}}";
-	private static final String POST_WXACODE_STR = "{\"scene\": \"%s\", \"path\": \"%s\", \"width\": 430}";
+	private static final String POST_WXACODE_STR = "{\"scene\": \"%s\", \"page\": \"%s\", \"width\": 430}";
 	private static final String POST_SEND_TEXT = "{\"touser\":\"%s\",\"msgtype\":\"text\",\"text\":{\"content\":\"%s\"}}";
 
 	public DefaultPOSTImpl(WXConfig wxConfig) {
