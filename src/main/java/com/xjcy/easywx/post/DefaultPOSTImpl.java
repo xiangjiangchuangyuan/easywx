@@ -42,6 +42,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	public String createQrcode(Integer sceneId) {
 		String postStr = String.format(POST_SCENE_ID, sceneId);
 		String json = WebClient.uploadString(String.format(URL_CREATEQRCODE, getAccessToken()), postStr);
+		logger.debug("Qrcode " + json);
 		return isSuccessful(json) ? json : null;
 	}
 
@@ -49,6 +50,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	public String createQrcode(String sceneStr) {
 		String postStr = String.format(POST_SCENE_STR, sceneStr);
 		String json = WebClient.uploadString(String.format(URL_CREATEQRCODE, getAccessToken()), postStr);
+		logger.debug("Qrcode " + json);
 		return isSuccessful(json) ? json : null;
 	}
 
@@ -75,19 +77,22 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	public boolean sendText(String openId, String text) {
 		String postStr = String.format(POST_SEND_TEXT, openId, text);
 		String json = WebClient.uploadString(String.format(URL_CUSTOM_SEND, getAccessToken()), postStr);
+		logger.debug("Send text " + json);
 		return isSuccessful(json);
 	}
 
 	@Override
 	public boolean createMenu(String json) {
 		String result = WebClient.uploadString(String.format(URL_MENU_CREATE, getAccessToken()), json);
+		logger.debug("Menu " + result);
 		return JSONUtils.getInteger(result, "errcode") == 0;
 	}
 
 	@Override
 	public boolean sendTemplate(String json) {
 		String result = WebClient.uploadString(String.format(URL_SEND_TEMPLATE, getAccessToken()), json);
-		return isSuccessful(result);
+		logger.debug("Send template " + result);
+		return JSONUtils.getInteger(result, "errcode") == 0;
 	}
 
 	@Override
