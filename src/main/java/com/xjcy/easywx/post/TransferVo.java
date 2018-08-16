@@ -21,7 +21,7 @@ public class TransferVo {
 		TransferVo tf = new TransferVo();
 		tf.openid = openId;
 		tf.partner_trade_no = System.nanoTime() +"";
-		tf.amount = 100;
+		tf.amount = 30; //最低为0.3元
 		tf.spbill_create_ip = "172.0.0.1";
 		tf.desc = "test";
 		tf.check_name = "NO_CHECK";
