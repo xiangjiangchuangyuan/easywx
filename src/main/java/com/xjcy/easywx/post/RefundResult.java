@@ -10,6 +10,7 @@ public class RefundResult {
 	public String total_fee;
 	public String cash_fee;
 	public String cash_refund_fee;
+	public String error;
 
 	@Override
 	public String toString()

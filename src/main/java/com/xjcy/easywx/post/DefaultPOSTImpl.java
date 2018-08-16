@@ -3,6 +3,8 @@ package com.xjcy.easywx.post;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.apache.log4j.Logger;
 
 import com.xjcy.easywx.AbstractPOST;
@@ -22,6 +24,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 	private static final String URL_SEND_TEMPLATE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s";
 	private static final String URL_CREATE_UNIFIEDORDER = "https://api.mch.weixin.qq.com/pay/unifiedorder";
 	private static final String URL_REFUND_ORDER = "https://api.mch.weixin.qq.com/secapi/pay/refund";
+	private static final String URL_TRANSFERS = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";
 
 	private static final String POST_SCENE_ID = "{\"action_name\": \"QR_LIMIT_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": %s}}}";
 	private static final String POST_SCENE_STR = "{\"action_name\": \"QR_LIMIT_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"%s\"}}}";
@@ -165,6 +168,7 @@ public class DefaultPOSTImpl extends AbstractPOST {
 
 	@Override
 	public RefundResult refundOrder(String out_trade_no, String refund_fee, String total_fee) {
+		RefundResult refund = new RefundResult();
 		try {
 			Map<String, Object> map = new HashMap<>();
 			map.put("appid", _appId);// 应用ID
@@ -186,8 +190,8 @@ public class DefaultPOSTImpl extends AbstractPOST {
 			Map<String, Object> result = XMLUtils.doXMLParse(return_xml);
 			String returnCode = getValue(result, "return_code");
 			String resultCode = getValue(result, "result_code");
+
 			if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
-				RefundResult refund = new RefundResult();
 				refund.appid = getValue(result, "appid");
 				refund.mch_id = getValue(result, "mch_id");
 				refund.transaction_id = getValue(result, "transaction_id"); // 微信订单号
@@ -197,12 +201,52 @@ public class DefaultPOSTImpl extends AbstractPOST {
 				refund.total_fee = getValue(result, "total_fee"); // 订单总金额
 				refund.cash_fee = getValue(result, "cash_fee"); // 现金支付金额
 				refund.cash_refund_fee = getValue(result, "cash_refund_fee"); // 现金退款金额
-				return refund;
+			} else {
+				refund.error = getValue(result, "err_code_des");
+				logger.error("Refund faild:" + result.toString());
 			}
-			logger.error("Refund faild:" + result.toString());
+			return refund;
 		} catch (Exception e) {
+			refund.error = e.getMessage();
 			logger.error("申请退款失败", e);
+			return refund;
 		}
-		return null;
+	}
+
+	public boolean transferCash(TransferVo tf, String p12, String p12Pass) {
+		Map<String, Object> map = new HashMap<>();
+		try {
+			map.put("mch_appid", _appId);// 应用ID
+			map.put("mchid", _mchId);// 商户号
+			map.put("nonce_str", getRandamStr());// 随机字符串
+			map.put("partner_trade_no", tf.partner_trade_no);// 商户订单号
+			map.put("openid", tf.openid);
+			map.put("check_name", tf.check_name);
+			if ("FORCE_CHECK".equals(tf.check_name))
+				map.put("re_user_name", tf.re_user_name);
+			map.put("amount", tf.amount);// 总金额(单位分)
+			map.put("desc", tf.desc);// 总金额(单位分)
+			map.put("spbill_create_ip", tf.spbill_create_ip); // 调用接口的机器Ip地址
+
+			// 增加签名
+			map.put("sign", getSign(map));// 签名
+
+			SSLSocketFactory ssl = WebClient.getSSLSocketFactory(p12, p12Pass);
+			String return_xml = WebClient.uploadData(URL_TRANSFERS, XMLUtils.toXML(map).getBytes(), ssl);
+			logger.debug("企业付款到零钱结果 => " + return_xml);
+			Map<String, Object> result = XMLUtils.doXMLParse(return_xml);
+			String returnCode = getValue(result, "return_code");
+			String resultCode = getValue(result, "result_code");
+			if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode))
+				return true;
+			else {
+				tf.error = getValue(result, "err_code_des");
+				return false;
+			}
+		} catch (Exception e) {
+			tf.error = e.getMessage();
+			logger.error("企业付款到零钱失败", e);
+			return false;
+		}
 	}
 }

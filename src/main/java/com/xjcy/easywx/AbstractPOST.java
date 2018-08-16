@@ -15,6 +15,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.xjcy.easywx.post.JsapiTicket;
 import com.xjcy.easywx.post.PayResult;
 import com.xjcy.easywx.post.RefundResult;
+import com.xjcy.easywx.post.TransferVo;
 import com.xjcy.easywx.post.UnifiedOrder;
 import com.xjcy.util.MD5;
 import com.xjcy.util.ObjectUtils;
@@ -55,6 +56,9 @@ public abstract class AbstractPOST {
 
 	// 申请退款
 	public abstract RefundResult refundOrder(String out_trade_no, String refund_fee, String total_fee);
+	
+	//企业付款到零钱
+	public abstract boolean transferCash(TransferVo tf, String p12, String p12Pass);
 
 	protected String getAccessToken() {
 		return WXUtil.get().getAccessToken();
